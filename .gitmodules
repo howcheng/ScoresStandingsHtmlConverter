@@ -1,0 +1,3 @@
+[submodule "GoogleSheetsHelper"]
+	path = GoogleSheetsHelper
+	url = https://github.com/howcheng/GoogleSheetsHelper
