@@ -105,8 +105,6 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 		[InlineData(2, false, false)]
 		public async void CanGetScores(int roundNum, bool hasFriendly, bool hasCancellation)
 		{
-			// test for basic path: no friendlies, no games cancelled
-
 			// create some data
 			List<RowData> rowData = CreateScoreRowData(hasFriendly, hasCancellation);
 

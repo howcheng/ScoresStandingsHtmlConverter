@@ -24,5 +24,13 @@ namespace ScoresStandingsHtmlConverter.Services
 			string cellValue = cellData.EffectiveValue.StringValue;
 			return RoundNumRegex.IsMatch(cellValue);
 		}
+
+		public static string StripParenthesesFromTeamName(string teamName)
+		{
+			int idx = teamName.IndexOf("(");
+			if (idx > -1)
+				teamName = teamName.Substring(0, idx - 1);
+			return teamName;
+		}
 	}
 }

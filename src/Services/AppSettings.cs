@@ -34,5 +34,6 @@
 
 		public string? SheetId { get; set; } // this value comes from the appSettings.json file
 
+		public string? FileOutputPath { get; set; } // this value comes from the appSettings.json file
 	}
 }
