@@ -78,17 +78,18 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Assert.Equal(3, cells.Count()); // 3 cells in each row: home team, score, away team
 			if (isFriendly || isCancelled)
 			{
-				Assert.NotNull(tr.Attributes["class"]);
-				string rowClass = tr.Attributes["class"].Value;
+				HtmlAttribute classAtt = tr.Attributes["class"];
+				Assert.NotNull(classAtt);
+				string rowClass = classAtt.Value;
 				if (isFriendly)
 					Assert.Contains("friendly", rowClass);
 				if (isCancelled)
 					Assert.Contains("cancelled", rowClass);
 			}	
 
-			string homeTeam = cells.ElementAt(0).InnerText.Trim();
-			string gameScore = cells.ElementAt(1).InnerText.Trim();
-			string awayTeam = cells.ElementAt(2).InnerText.Trim();
+			string homeTeam = TestHelper.GetHtmlCellContent(tr, 0);
+			string gameScore = TestHelper.GetHtmlCellContent(tr, 1);
+			string awayTeam = TestHelper.GetHtmlCellContent(tr, 2);
 
 			// we stripped the coach name from the team name for the HTML
 			Assert.StartsWith(homeTeam, score.HomeTeam);

@@ -66,7 +66,7 @@ namespace ScoresStandingsHtmlConverter.Services
 			{
 				standings.Add(new StandingsRow
 				{
-					Team = (string)dataRow[0],
+					TeamName = (string)dataRow[0],
 					GamesPlayed = (int)dataRow[1],
 					Wins = (int)dataRow[2],
 					Losses = (int)dataRow[3],

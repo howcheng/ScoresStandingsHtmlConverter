@@ -37,7 +37,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 					// rows for games
 					for (int j = 0; j < standings.Count(); j += 2)
 					{
-						ret.Add(standings.ElementAt(j).Team!);
+						ret.Add(standings.ElementAt(j).TeamName!);
 					}
 					// blank rows
 					for (int j = 0; j < standings.Count(); j += 2)
@@ -57,7 +57,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				{
 					List<object> list = new List<object>
 					{
-						row.Team!,
+						row.TeamName!,
 						row.GamesPlayed,
 						row.Wins,
 						row.Losses,
@@ -90,7 +90,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Assert.NotNull(result);
 			Assert.All(result, x =>
 			{
-				StandingsRow match = standings.Single(s => s.Team == x.Team);
+				StandingsRow match = standings.Single(s => s.TeamName == x.TeamName);
 				x.Should().BeEquivalentTo(match);
 			});
 		}

@@ -30,7 +30,7 @@
 		public virtual bool DoStandings { get; set; }
 		public virtual bool DoScores { get; set; }
 
-		public int CurrentRound { get; set; } // this value is extracted from the Google sheet based on the date
+		public int CurrentRound { get; set; } // this value is extracted from the Google sheet based on the date (populated in ScoresExtractor and used in StandingsHtmlWriter for playoff places)
 
 		public string? SheetId { get; set; } // this value comes from the appSettings.json file
 

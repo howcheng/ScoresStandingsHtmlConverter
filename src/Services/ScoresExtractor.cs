@@ -32,7 +32,7 @@ namespace ScoresStandingsHtmlConverter.Services
 					if (scores.Count > 0)
 						break; // we've reached the next round and we already have scores, so we must be done
 
-					roundNum = Helpers.GetRoundNumberFromCellData(firstCell);
+					_appSettings.CurrentRound = roundNum = Helpers.GetRoundNumberFromCellData(firstCell);
 					roundDate = Helpers.GetDateOfRoundFromCellValue(firstCellValue);
 					continue;
 				}
