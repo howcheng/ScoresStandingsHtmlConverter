@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Google.Apis.Sheets.v4.Data;
+﻿using Google.Apis.Sheets.v4.Data;
 using GoogleSheetsHelper;
 
 namespace ScoresStandingsHtmlConverter.Services
@@ -27,20 +22,22 @@ namespace ScoresStandingsHtmlConverter.Services
 			// extract the scores from the sheet
 			List<GameScore> scores = new List<GameScore>();
 			int roundNum = 0;
+			DateTime roundDate = DateTime.MinValue;
 			foreach (RowData row in rows)
 			{
 				CellData firstCell = row.Values.First();
 				string firstCellValue = firstCell.EffectiveValue.StringValue;
-				if (Helpers.CellDataContainsRoundNumber(firstCell))
+				if (Helpers.IsRoundHeaderCell(firstCell))
 				{
 					if (scores.Count > 0)
-						break;
+						break; // we've reached the next round and we already have scores, so we must be done
 
 					roundNum = Helpers.GetRoundNumberFromCellData(firstCell);
+					roundDate = Helpers.GetDateOfRoundFromCellValue(firstCellValue);
 					continue;
 				}
 
-				if (roundNum != _appSettings.CurrentRound)
+				if (roundDate != _appSettings.DateOfRound)
 					continue; // old scores
 				if (firstCellValue == "HOME")
 					continue; // subheader row

@@ -23,7 +23,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				// round number row
 				Values = new List<CellData>
 				{
-					CreateCellDataForText($"ROUND {roundNum}: {DateTime.Today.AddDays((roundNum - 1) * 7).ToString("M/d")}"),
+					CreateCellDataForText($"ROUND {roundNum}: {TestHelper.CreateRoundDateFromNumber(roundNum)}"),
 				},
 			});
 			rows.Add(new RowData
@@ -114,7 +114,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 
 			AppSettings settings = new AppSettings
 			{
-				CurrentRound = roundNum,
+				DateOfRound = TestHelper.CreateRoundDateFromNumber(roundNum),
 				Divisions = new[] { Constants.DIV_14UG },
 			};
 
