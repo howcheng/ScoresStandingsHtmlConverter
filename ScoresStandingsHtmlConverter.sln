@@ -15,6 +15,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Services.Tests", "test\Serv
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleSheetsHelper", "GoogleSheetsHelper\src\GoogleSheetsHelper.csproj", "{AD6E26F9-CDDE-4E5F-BF34-04324A44EF7E}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogleOAuthCliClient", "GoogleOAuthCliClient\src\GoogleOAuthCliClient.csproj", "{26C8D90E-611F-4483-8610-1447454AAEB9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -37,6 +39,10 @@ Global
 		{AD6E26F9-CDDE-4E5F-BF34-04324A44EF7E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AD6E26F9-CDDE-4E5F-BF34-04324A44EF7E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AD6E26F9-CDDE-4E5F-BF34-04324A44EF7E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{26C8D90E-611F-4483-8610-1447454AAEB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{26C8D90E-611F-4483-8610-1447454AAEB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{26C8D90E-611F-4483-8610-1447454AAEB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{26C8D90E-611F-4483-8610-1447454AAEB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -44,6 +50,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{47E3D917-0CFA-41B6-8DA5-8F29BCCDD187} = {1CC68FED-6734-48F5-AA2F-9B5278B2C84F}
 		{AD6E26F9-CDDE-4E5F-BF34-04324A44EF7E} = {E97112FB-BFAA-490E-9F52-0317BAA3FD1E}
+		{26C8D90E-611F-4483-8610-1447454AAEB9} = {E97112FB-BFAA-490E-9F52-0317BAA3FD1E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F9B10E06-FF41-49E8-AA6B-12CE9FB5DE82}

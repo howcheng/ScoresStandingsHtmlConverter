@@ -1,3 +1,6 @@
 [submodule "GoogleSheetsHelper"]
 	path = GoogleSheetsHelper
 	url = https://github.com/howcheng/GoogleSheetsHelper
+[submodule "GoogleOAuthCliClient"]
+	path = GoogleOAuthCliClient
+	url = https://github.com/howcheng/GoogleOAuthCliClient
