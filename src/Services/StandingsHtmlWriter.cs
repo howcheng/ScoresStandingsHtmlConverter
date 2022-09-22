@@ -112,7 +112,7 @@ namespace ScoresStandingsHtmlConverter.Services
 			_htmlWriter.RenderEndTag();
 
 			// write the file
-			string filename = $"{_appSettings.DateOfRound.ToString("M/d")}\\{division} standings.html";
+			string filename = $"{division} standings.html";
 			await _fileWriter.WriteFile(filename, _stringWriter.ToString()!);
 		}
 

@@ -17,7 +17,9 @@ namespace ScoresStandingsHtmlConverter.Services
 
 		public static bool IsRoundHeaderCell(CellData cellData)
 		{
-			string cellValue = cellData.EffectiveValue.StringValue;
+			string? cellValue = cellData.EffectiveValue?.StringValue;
+			if (cellValue == null)
+				return false;
 			return RoundNumRegex.IsMatch(cellValue);
 		}
 

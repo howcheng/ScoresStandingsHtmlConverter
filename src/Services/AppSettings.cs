@@ -13,27 +13,37 @@
 			s_DefaultDate = lastSaturday;
 		}
 
-		private string[]? _divisions;
-		public virtual string[] Divisions 
+		private IEnumerable<string>? _divisions;
+		public IEnumerable<string>? Divisions 
 		{
 			get => _divisions ?? s_DefaultDivisions;
-			set => _divisions = value;
+			set
+			{
+				if (value != null && value.Any())
+					_divisions = value;
+			}
 		}
 
 		private DateTime? _dateOfRound;
-		public virtual DateTime DateOfRound 
+		public DateTime? DateOfRound 
 		{ 
 			get => _dateOfRound ?? s_DefaultDate;
-			set => _dateOfRound = value;
+			set
+			{
+				if (value != null)
+					_dateOfRound = value;
+			}
 		}
 
-		public virtual bool DoStandings { get; set; }
-		public virtual bool DoScores { get; set; }
+		public bool DoStandings { get; set; } = true;
+		public bool DoScores { get; set; } = true;
 
 		public int CurrentRound { get; set; } // this value is extracted from the Google sheet based on the date (populated in ScoresExtractor and used in StandingsHtmlWriter for playoff places)
 
 		public string? SheetId { get; set; } // this value comes from the appSettings.json file
 
 		public string? FileOutputPath { get; set; } // this value comes from the appSettings.json file
+
+		public string? ClientSecretsPath { get; set; } // this value comes from the appSettings.json file
 	}
 }

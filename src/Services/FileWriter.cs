@@ -11,7 +11,10 @@
 
 		public async Task WriteFile(string filename, string output)
 		{
-			string filePath = $"{_appSettings.DateOfRound}\\{filename}";
+			string folderPath = $"{_appSettings.FileOutputPath}\\{_appSettings.DateOfRound:yyyy-MM-dd}";
+			if (!Directory.Exists(folderPath))
+				Directory.CreateDirectory(folderPath);
+			string filePath = $"{folderPath}\\{filename}";
 			if (File.Exists(filePath))
 				File.Delete(filePath);
 

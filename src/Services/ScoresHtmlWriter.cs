@@ -44,7 +44,7 @@ namespace ScoresStandingsHtmlConverter.Services
 			_htmlWriter.RenderEndTag();
 			_htmlWriter.RenderEndTag();
 
-			string filename = $"{scores.First().DateOfRound.ToString("M/d")}\\{division} scores.html";
+			string filename = $"{division} scores.html";
 			await _fileWriter.WriteFile(filename, _stringWriter.ToString()!);
 		}
 

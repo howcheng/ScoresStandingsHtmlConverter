@@ -19,7 +19,6 @@ namespace ScoresStandingsHtmlConverter.Services
 			string range = $"'{division}'!A1:A";
 			IList<string> values = (await _sheetsClient.GetValues(range)).First().Cast<string>().ToList();
 			int headerRowIdx = 0;
-			DateTime roundDate = DateTime.MinValue;
 
 			// figure out which round we are doing and the index of the row
 			for (int i = 0; i < values.Count; i++)
@@ -30,7 +29,7 @@ namespace ScoresStandingsHtmlConverter.Services
 
 				if (Helpers.IsRoundHeaderCell(value))
 				{
-					roundDate = Helpers.GetDateOfRoundFromCellValue(value);
+					DateTime roundDate = Helpers.GetDateOfRoundFromCellValue(value);
 					if (roundDate == _appSettings.DateOfRound)
 					{
 						headerRowIdx = i;
@@ -67,14 +66,14 @@ namespace ScoresStandingsHtmlConverter.Services
 				standings.Add(new StandingsRow
 				{
 					TeamName = (string)dataRow[0],
-					GamesPlayed = (int)dataRow[1],
-					Wins = (int)dataRow[2],
-					Losses = (int)dataRow[3],
-					Draws = (int)dataRow[4],
-					GamePoints = (int)dataRow[5],
-					RefPoints = (int)dataRow[6],
-					TotalPoints = (int)dataRow[7],
-					Rank = (int)dataRow[8],
+					GamesPlayed = Convert.ToInt32(dataRow[1]),
+					Wins = Convert.ToInt32(dataRow[2]),
+					Losses = Convert.ToInt32(dataRow[3]),
+					Draws = Convert.ToInt32(dataRow[4]),
+					GamePoints = Convert.ToInt32(dataRow[5]),
+					RefPoints = Convert.ToInt32(dataRow[6]),
+					TotalPoints = Convert.ToInt32(dataRow[7]),
+					Rank = Convert.ToInt32(dataRow[8]),
 				});
 			}
 
