@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
@@ -36,19 +37,24 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				DateOfRound = TestHelper.CreateRoundDateFromNumber(roundNum),
 			};
 
-			using (StandingsHtmlWriter writer = new StandingsHtmlWriter(settings, mockFileWriter.Object))
+			using (StandingsHtmlWriter writer = new StandingsHtmlWriter(settings, mockFileWriter.Object, Mock.Of<ILogger<StandingsHtmlWriter>>()))
 			{
 				// picking 10UG because there are 2 playoff spots
 				await writer.WriteStandingsToFile(Constants.DIV_10UG, standings);
 
-				Assert.StartsWith(settings.DateOfRound.ToString("M/d"), filename);
-				Assert.Contains(Constants.DIV_10UG, filename);
+				Assert.StartsWith(Constants.DIV_10UG, filename);
 				Assert.NotNull(html);
 				HtmlDocument document = new HtmlDocument();
 				document.LoadHtml(html);
 
 				HtmlNode table = document.DocumentNode.FirstChild;
 				Assert.Equal("standings", table.Attributes["class"].Value);
+
+				HtmlNode? colgroup = table.ChildNodes.SingleOrDefault(x => x.Name == "colgroup");
+				Assert.NotNull(colgroup);
+
+				HtmlNode? thead = table.ChildNodes.SingleOrDefault(x => x.Name == "thead");
+				Assert.NotNull(thead);
 
 				HtmlNode? tbody = table.ChildNodes.SingleOrDefault(x => x.Name == "tbody");
 				Assert.NotNull(tbody);

@@ -35,8 +35,9 @@
 			}
 		}
 
-		public bool DoStandings { get; set; } = true;
-		public bool DoScores { get; set; } = true;
+		// These two are opposite of how I normally like to do them because it's counterintuitive, but this is forced upon us by the CommandLine package; see https://github.com/commandlineparser/commandline/issues/702
+		public bool NoStandings { get; set; } = false;
+		public bool NoScores { get; set; } = false;
 
 		public int CurrentRound { get; set; } // this value is extracted from the Google sheet based on the date (populated in ScoresExtractor and used in StandingsHtmlWriter for playoff places)
 

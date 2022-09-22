@@ -7,10 +7,11 @@ namespace ScoresStandingsHtmlConverter.Services
 	{
 		public static Regex RoundNumRegex = new Regex(@"ROUND (\d+): (\d+/\d+)");
 
-		public static int GetRoundNumberFromCellData(CellData cellData)
+		public static int GetRoundNumberFromCellData(CellData cellData) => GetRoundNunberFromCellValue(cellData.EffectiveValue.StringValue);
+
+		public static int GetRoundNunberFromCellValue(string? value)
 		{
-			string cellValue = cellData.EffectiveValue.StringValue;
-			Match match = RoundNumRegex.Match(cellValue);
+			Match match = RoundNumRegex.Match(value!);
 			int roundNum = int.Parse(match.Groups.Values.ElementAt(1).Value);
 			return roundNum;
 		}
@@ -23,11 +24,11 @@ namespace ScoresStandingsHtmlConverter.Services
 			return RoundNumRegex.IsMatch(cellValue);
 		}
 
-		public static bool IsRoundHeaderCell(string value) => RoundNumRegex.IsMatch(value);
+		public static bool IsRoundHeaderCell(string? value) => string.IsNullOrEmpty(value) ? false : RoundNumRegex.IsMatch(value);
 
-		public static DateTime GetDateOfRoundFromCellValue(string value)
+		public static DateTime GetDateOfRoundFromCellValue(string? value)
 		{
-			Match match = RoundNumRegex.Match(value);
+			Match match = RoundNumRegex.Match(value!);
 			DateTime dt = DateTime.Parse($"{DateTime.Today.Year}/{match.Groups.Values.Last().Value}");
 			return dt;
 		}

@@ -43,7 +43,7 @@ namespace ScoresStandingsHtmlConverter.Console
 			System.Console.WriteLine("--------------");
 		}
 
-		private static IServiceProvider BuildServiceProvider(AppSettings settings)
+		private static IServiceProvider BuildSharedServices(AppSettings settings)
 		{
 			IServiceCollection services = new ServiceCollection();
 			services.AddLogging(builder =>
@@ -55,19 +55,36 @@ namespace ScoresStandingsHtmlConverter.Console
 			services.AddSingleton(settings);
 			services.AddSingleton(GoogleCredential!);
 			services.AddSingleton<ISheetsClient>(provider => ActivatorUtilities.CreateInstance<SheetsClient>(provider, settings.SheetId!));
+			return services.BuildServiceProvider();
+		}
+
+		private static IServiceProvider BuildServiceProvider(IServiceProvider provider, string division)
+		{
+			AppSettings settings = provider.GetRequiredService<AppSettings>();
+
+			IServiceCollection services = new ServiceCollection();
+			services.AddLogging(builder =>
+			{
+				builder.ClearProviders();
+				builder.AddDebug();
+				builder.AddConsole();
+			});
+			services.AddSingleton(settings);
+			services.AddSingleton(provider.GetRequiredService<ISheetsClient>());
+
 			services.AddTransient<IFileWriter, FileWriter>();
 
-			if (settings.DoScores)
+			if (!settings.NoScores)
 			{
 				services.AddTransient<IScoresExtractor, ScoresExtractor>();
 				services.AddTransient<IScoresHtmlWriter, ScoresHtmlWriter>();
-				services.AddTransient<IService, ScoresService>();
+				services.AddTransient<IService>(p => ActivatorUtilities.CreateInstance<ScoresService>(p, division));
 			}
-			if (settings.DoStandings)
+			if (!settings.NoStandings)
 			{
 				services.AddTransient<IStandingsExtractor, StandingsExtractor>();
 				services.AddTransient<IStandingsHtmlWriter, StandingsHtmlWriter>();
-				services.AddTransient<IService, StandingsService>();
+				services.AddTransient<IService>(p => ActivatorUtilities.CreateInstance<StandingsService>(p, division));
 			}
 
 			return services.BuildServiceProvider();
@@ -75,7 +92,7 @@ namespace ScoresStandingsHtmlConverter.Console
 
 		private static async Task Run(Arguments args)
 		{
-			if (!args.DoScores && !args.DoStandings)
+			if (args.NoScores && args.NoStandings)
 			{
 				System.Console.WriteLine("You started me but told me not to do scores or standings. What was the point? Press any key to exit.");
 				System.Console.ReadKey();
@@ -103,21 +120,28 @@ namespace ScoresStandingsHtmlConverter.Console
 			// load the credential
 			GoogleCredential = GoogleCredential.FromAccessToken(checker.AccessToken);
 
-			System.Console.WriteLine("Creating {0}{1}{2} for {3:M/d} for the following divisions: {4}"
-				, settings.DoScores ? "scores" : string.Empty
-				, settings.DoScores && settings.DoStandings ? " and " : string.Empty
-				, settings.DoScores ? "standings" : string.Empty
+			IServiceProvider sharedProvider = BuildSharedServices(settings);
+
+			ILogger<Program> log = sharedProvider.GetRequiredService<ILogger<Program>>();
+			log.LogInformation("Creating {0}{1}{2} for {3:M/d} for the following divisions: {4}"
+				, !settings.NoScores ? "scores" : string.Empty
+				, !settings.NoScores && !settings.NoStandings ? " and " : string.Empty
+				, !settings.NoScores ? "standings" : string.Empty
 				, settings.DateOfRound
-				, settings.Divisions.Aggregate((s1, s2) => $"{s1}, {s2}")
+				, settings.Divisions!.Aggregate((s1, s2) => $"{s1}, {s2}")
 				);
 
-			IServiceProvider provider = BuildServiceProvider(settings);
-
-			IEnumerable<IService> services = provider.GetServices<IService>();
-			foreach (IService service in services)
+			foreach (string division in settings.Divisions!)
 			{
-				await service.Execute();
+				IServiceProvider provider = BuildServiceProvider(sharedProvider, division);
+				IEnumerable<IService> services = provider.GetServices<IService>();
+				foreach (IService service in services)
+				{
+					await service.Execute();
+				}
 			}
+
+			log.LogInformation("All done!");
 		}
 	}
 }

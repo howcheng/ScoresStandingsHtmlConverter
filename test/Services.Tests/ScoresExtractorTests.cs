@@ -1,5 +1,6 @@
 using Google.Apis.Sheets.v4.Data;
 using GoogleSheetsHelper;
+using Microsoft.Extensions.Logging;
 using Color = System.Drawing.Color;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
@@ -62,10 +63,10 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			{
 				Values = new List<CellData>
 				{
-					CreateCellDataForText("Team 5 (Nkunku)", hasFriendly, hasCancellation),
+					CreateCellDataForText("Team 5 (Nkunku)", hasFriendly),
 					CreateCellDataForNumber(1, hasFriendly, hasCancellation),
 					CreateCellDataForNumber(2, hasFriendly, hasCancellation),
-					CreateCellDataForText("Team 6 (Jorgensen)", hasFriendly, hasCancellation)
+					CreateCellDataForText("Team 6 (Jorgensen)", hasFriendly)
 				},
 			});
 
@@ -77,7 +78,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			return rows;
 		}
 
-		private CellData CreateCellDataForText(string text, bool isFriendly = false, bool isCancelled = false)
+		private CellData CreateCellDataForText(string text, bool isFriendly = false)
 			=> new CellData
 			{
 				EffectiveValue = new ExtendedValue { StringValue = text },
@@ -118,7 +119,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				Divisions = new[] { Constants.DIV_14UG },
 			};
 
-			ScoresExtractor service = new ScoresExtractor(settings, mockClient.Object);
+			ScoresExtractor service = new ScoresExtractor(settings, mockClient.Object, Mock.Of<ILogger<ScoresExtractor>>());
 			IEnumerable<GameScore> scores = await service.GetScores(settings.Divisions.First());
 
 			Assert.True(scores.Any());

@@ -1,4 +1,5 @@
 ﻿using System.Web.UI;
+using Microsoft.Extensions.Logging;
 
 namespace ScoresStandingsHtmlConverter.Services
 {
@@ -18,18 +19,23 @@ namespace ScoresStandingsHtmlConverter.Services
 		private readonly HtmlTextWriter _htmlWriter;
 		private readonly AppSettings _appSettings;
 		private readonly IFileWriter _fileWriter;
+		private readonly ILogger<StandingsHtmlWriter> _logger;
+
 		private bool _disposed;
 
-		public StandingsHtmlWriter(AppSettings settings, IFileWriter fileWriter)
+		public StandingsHtmlWriter(AppSettings settings, IFileWriter fileWriter, ILogger<StandingsHtmlWriter> log)
 		{
 			_stringWriter = new StringWriter();
 			_htmlWriter = new HtmlTextWriter(_stringWriter);
 			_appSettings = settings;
 			_fileWriter = fileWriter;
+			_logger = log;
 		}
 
 		public async Task WriteStandingsToFile(string division, IEnumerable<StandingsRow> standingsRows)
 		{
+			_logger.LogInformation($"Beginning standings file for {division}...");
+
 			_htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "standings");
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Colgroup);

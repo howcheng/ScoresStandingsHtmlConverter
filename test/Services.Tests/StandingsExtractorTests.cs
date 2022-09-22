@@ -1,7 +1,9 @@
 ﻿using System.Text.RegularExpressions;
 using AutoFixture;
 using FluentAssertions;
+using Google.Apis.Sheets.v4.Data;
 using GoogleSheetsHelper;
+using Microsoft.Extensions.Logging;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
@@ -25,27 +27,27 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 
 			// create mocks
 			Mock<ISheetsClient> mockClient = new Mock<ISheetsClient>();
-			mockClient.Setup(x => x.GetValues(It.Is<string>(s => s.EndsWith("A1:A")), It.IsAny<CancellationToken>())).ReturnsAsync(() =>
+			mockClient.Setup(x => x.GetRowData(It.Is<string>(s => s.EndsWith("A1:A")), It.IsAny<CancellationToken>())).ReturnsAsync(() =>
 			{
 				// setup for returning column A: round header, subheader, game rows
-				List<object> ret = new List<object>((COUNT + 2) * 2);
+				List<RowData> ret = new List<RowData>((COUNT + 2) * 2);
 				for (int i = 0; i < 2; i++)
 				{
 					DateTime roundDate = i == 0 ? round1Dt : round2Dt;
-					ret.Add($"ROUND {i + 1}: {roundDate:M/d}");
-					ret.Add("HOME");
+					ret.Add(CreateSingleCellRow($"ROUND {i + 1}: {roundDate:M/d}" ));
+					ret.Add(CreateSingleCellRow("HOME"));
 					// rows for games
 					for (int j = 0; j < standings.Count(); j += 2)
 					{
-						ret.Add(standings.ElementAt(j).TeamName!);
+						ret.Add(CreateSingleCellRow(standings.ElementAt(j).TeamName!));
 					}
 					// blank rows
 					for (int j = 0; j < standings.Count(); j += 2)
 					{
-						ret.Add(string.Empty);
+						ret.Add(CreateSingleCellRow(string.Empty));
 					}
 				}
-				return new List<IList<object>> { ret };
+				return ret;
 			});
 			string? range = null;
 			Action<string, CancellationToken> callback = (s, token) => range = s;
@@ -78,7 +80,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				Divisions = new[] { Constants.DIV_14UG },
 			};
 
-			StandingsExtractor service = new StandingsExtractor(settings, mockClient.Object);
+			StandingsExtractor service = new StandingsExtractor(settings, mockClient.Object, Mock.Of<ILogger<StandingsExtractor>>());
 			IEnumerable<StandingsRow> result = await service.GetStandings(settings.Divisions.First());
 
 			Assert.NotNull(range);
@@ -88,11 +90,33 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Assert.EndsWith($"F{startRow}:N{endRow}", range);
 
 			Assert.NotNull(result);
+			Assert.Equal(standings.Count(), result.Count());
 			Assert.All(result, x =>
 			{
 				StandingsRow match = standings.Single(s => s.TeamName == x.TeamName);
 				x.Should().BeEquivalentTo(match);
 			});
 		}
+
+		private RowData CreateSingleCellRow(string? text)
+			=> new RowData
+			{
+				Values = text == null ? null : new List<CellData>
+				{
+					CreateCellDataForText(text)
+				}
+			};
+
+		private CellData CreateCellDataForText(string text)
+			=> new CellData
+			{
+				EffectiveValue = new ExtendedValue { StringValue = text },
+			};
+
+		private CellData CreateCellDataForNumber(int? number)
+			=> new CellData
+			{
+				EffectiveValue = new ExtendedValue { NumberValue = number },
+			};
 	}
 }

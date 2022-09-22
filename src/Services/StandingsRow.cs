@@ -9,7 +9,7 @@
 		public int Draws { get; set; }
 		public int GamePoints { get; set; }
 		public int RefPoints { get; set; }
-		public int TotalPoints { get; set; }
+		public float TotalPoints { get; set; }
 		public int Rank { get; set; }
 	}
 }

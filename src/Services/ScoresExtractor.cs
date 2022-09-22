@@ -1,5 +1,6 @@
 ﻿using Google.Apis.Sheets.v4.Data;
 using GoogleSheetsHelper;
+using Microsoft.Extensions.Logging;
 
 namespace ScoresStandingsHtmlConverter.Services
 {
@@ -7,11 +8,13 @@ namespace ScoresStandingsHtmlConverter.Services
 	{
 		private readonly AppSettings _appSettings;
 		private readonly ISheetsClient _sheetsClient;
+		private readonly ILogger<ScoresExtractor> _logger;
 
-		public ScoresExtractor(AppSettings settings, ISheetsClient sheetsClient)
+		public ScoresExtractor(AppSettings settings, ISheetsClient sheetsClient, ILogger<ScoresExtractor> log)
 		{
 			_appSettings = settings;
 			_sheetsClient = sheetsClient;
+			_logger = log;
 		}
 
 		public async Task<IEnumerable<GameScore>> GetScores(string division)
@@ -35,6 +38,7 @@ namespace ScoresStandingsHtmlConverter.Services
 						break; // we've reached the next round and we already have scores, so we must be done
 
 					_appSettings.CurrentRound = roundNum = Helpers.GetRoundNumberFromCellData(firstCell);
+
 					roundDate = Helpers.GetDateOfRoundFromCellValue(firstCellValue!);
 					continue;
 				}
@@ -46,8 +50,11 @@ namespace ScoresStandingsHtmlConverter.Services
 				if (string.IsNullOrEmpty(firstCellValue))
 					continue; // blank row or a placeholder for a game that did not take place this week (e.g., bye week instead of a friendly)
 
+				if (scores.Count == 0)
+					_logger.LogInformation($"Getting scores for {division} in round {roundNum}...");
+
 				bool gameCancelled = (row.Values[1].EffectiveValue == null && row.Values[2].EffectiveValue == null);
-				bool friendly = Utilities.GoogleColorEquals(firstCell.EffectiveFormat.TextFormat.ForegroundColorStyle.RgbColor, System.Drawing.Color.Red);
+				bool friendly = firstCell.EffectiveFormat.TextFormat.ForegroundColorStyle.RgbColor.GoogleColorEquals(System.Drawing.Color.Red);
 
 				GameScore score = new GameScore
 				{
@@ -60,6 +67,15 @@ namespace ScoresStandingsHtmlConverter.Services
 					Cancelled = gameCancelled,
 					Friendly = friendly,
 				};
+				string logMsg = $"Game {scores.Count + 1}: {score.HomeTeam} vs. {score.AwayTeam}";
+				if (friendly)
+					logMsg = $"{logMsg} (friendly)";
+				if (gameCancelled)
+					logMsg = $"{logMsg}, cancelled";
+				else
+					logMsg = $"{logMsg}: {score.HomeScore}–{score.AwayScore}";
+
+				_logger.LogDebug(logMsg);
 				scores.Add(score);
 			}
 

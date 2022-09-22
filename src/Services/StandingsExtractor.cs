@@ -1,4 +1,6 @@
-﻿using GoogleSheetsHelper;
+﻿using Microsoft.Extensions.Logging;
+using Google.Apis.Sheets.v4.Data;
+using GoogleSheetsHelper;
 
 namespace ScoresStandingsHtmlConverter.Services
 {
@@ -6,24 +8,30 @@ namespace ScoresStandingsHtmlConverter.Services
 	{
 		private readonly AppSettings _appSettings;
 		private readonly ISheetsClient _sheetsClient;
+		private readonly ILogger<StandingsExtractor> _logger;
 
-		public StandingsExtractor(AppSettings appSettings, ISheetsClient sheetsClient)
+		public StandingsExtractor(AppSettings appSettings, ISheetsClient sheetsClient, ILogger<StandingsExtractor> log)
 		{
 			_appSettings = appSettings;
 			_sheetsClient = sheetsClient;
+			_logger = log;
 		}
 
 		public async Task<IEnumerable<StandingsRow>> GetStandings(string division)
 		{
 			// figure out which round this is so we can get the correct round's standings
 			string range = $"'{division}'!A1:A";
-			IList<string> values = (await _sheetsClient.GetValues(range)).First().Cast<string>().ToList();
+			IList<RowData> rows = await _sheetsClient.GetRowData(range); // don't use GetValues() here because it skips null values
 			int headerRowIdx = 0;
 
+			Func<RowData, string?> getText = rd => rd.Values?.FirstOrDefault()?.EffectiveValue?.StringValue;
+
 			// figure out which round we are doing and the index of the row
-			for (int i = 0; i < values.Count; i++)
+			// note: can't use a LINQ Select() query to get the string values because some rows have no CellData children, which will cause a NullReferenceException
+			int roundNum = 0;
+			for (int i = 0; i < rows.Count(); i++)
 			{
-				string value = values[i];
+				string? value = getText(rows.ElementAt(i));
 				if (string.IsNullOrEmpty(value))
 					continue;
 
@@ -32,17 +40,20 @@ namespace ScoresStandingsHtmlConverter.Services
 					DateTime roundDate = Helpers.GetDateOfRoundFromCellValue(value);
 					if (roundDate == _appSettings.DateOfRound)
 					{
+						_appSettings.CurrentRound = roundNum = Helpers.GetRoundNunberFromCellValue(value); // even though we set this in the ScoresExtractor, this is in case we generate standings only
 						headerRowIdx = i;
 						break;
 					}
 				}
 			}
 
+			_logger.LogInformation($"Getting standings for {division} in round {roundNum}...");
+
 			// figure out how many teams are in the division by counting the number of rows in round 1
 			int numTeams = 0;
-			for (int i = 0; i < values.Count; i++)
+			for (int i = 0; i < rows.Count(); i++)
 			{
-				string value = values[i];
+				string? value = getText(rows.ElementAt(i));
 				if (Helpers.IsRoundHeaderCell(value) || value == "HOME")
 				{
 					if (numTeams > 0)
@@ -58,6 +69,7 @@ namespace ScoresStandingsHtmlConverter.Services
 
 			// now we make the request for the standings data
 			range = $"'{division}'!F{startRow}:N{endRow}";
+			_logger.LogDebug($"Making request for data in range {range} ({numTeams} teams)");
 			IList<IList<object>> standingsData = await _sheetsClient.GetValues(range);
 
 			List<StandingsRow> standings = new List<StandingsRow>();
@@ -72,7 +84,7 @@ namespace ScoresStandingsHtmlConverter.Services
 					Draws = Convert.ToInt32(dataRow[4]),
 					GamePoints = Convert.ToInt32(dataRow[5]),
 					RefPoints = Convert.ToInt32(dataRow[6]),
-					TotalPoints = Convert.ToInt32(dataRow[7]),
+					TotalPoints = Convert.ToSingle(dataRow[7]),
 					Rank = Convert.ToInt32(dataRow[8]),
 				});
 			}

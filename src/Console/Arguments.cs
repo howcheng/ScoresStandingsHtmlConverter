@@ -8,9 +8,9 @@ namespace ScoresStandingsHtmlConverter.Console
 		public IEnumerable<string>? Divisions { get; set; }
 		[Option("date", Required = false)]
 		public DateTime? DateOfRound { get; set; }
-		[Option("standings", Required = false, Default = true)]
-		public bool DoStandings { get; set; }
-		[Option("scores", Required = false, Default = true)]
-		public bool DoScores { get; set; }
+		[Option("no-standings", Required = false)]
+		public bool NoStandings { get; set; }
+		[Option("no-scores", Required = false)]
+		public bool NoScores { get; set; }
 	}
 }

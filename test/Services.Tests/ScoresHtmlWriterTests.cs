@@ -1,5 +1,6 @@
 ﻿using AutoFixture;
 using HtmlAgilityPack;
+using Microsoft.Extensions.Logging;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
@@ -47,12 +48,11 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			};
 			mockFileWriter.Setup(x => x.WriteFile(It.IsAny<string>(), It.IsAny<string>())).Callback(callback);
 
-			using (ScoresHtmlWriter writer = new ScoresHtmlWriter(mockFileWriter.Object))
+			using (ScoresHtmlWriter writer = new ScoresHtmlWriter(mockFileWriter.Object, Mock.Of<ILogger<ScoresHtmlWriter>>()))
  			{
 				await writer.WriteScoresToFile(DIVISION, scores);
 
-				Assert.StartsWith(scores.First().DateOfRound.ToString("M/d"), filename);
-				Assert.Contains(DIVISION, filename);
+				Assert.StartsWith(DIVISION, filename);
 				Assert.NotNull(html);
 				HtmlDocument document = new HtmlDocument();
 				document.LoadHtml(html);
