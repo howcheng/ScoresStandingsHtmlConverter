@@ -5,6 +5,7 @@ namespace ScoresStandingsHtmlConverter.Services
 {
 	public class StandingsHtmlWriter : IStandingsHtmlWriter, IDisposable
 	{
+		private const int MIN_REF_PTS_FOR_PLAYOFFS = 5;
 		private static Dictionary<string, int> s_playoffPlaces = new Dictionary<string, int>
 		{
 			{ Constants.DIV_10UB, 2 },
@@ -66,15 +67,19 @@ namespace ScoresStandingsHtmlConverter.Services
 
 			List<StandingsRow> standings = standingsRows.ToList();
 			standings.Sort(new StandingsComparer());
+			List<StandingsRow> qualifiedForPlayoffs = new List<StandingsRow>();
 
 			int index = 0;
 			int howManyQualifyForPlayoffs = s_playoffPlaces[division];
-			foreach (StandingsRow standingsRow in standings)
+			foreach (StandingsRow standingsRow in standings) 
 			{
 				string? rowClass = null;
 				bool useAltClass = (index % 2) == 1;
-				if (_appSettings.CurrentRound >= 6 && standingsRow.Rank <= howManyQualifyForPlayoffs)
+				if (_appSettings.CurrentRound >= 6 && qualifiedForPlayoffs.Count < howManyQualifyForPlayoffs && standingsRow.RefPoints >= MIN_REF_PTS_FOR_PLAYOFFS)
+				{
 					rowClass = useAltClass ? "playoffsalt" : "playoffs";
+					qualifiedForPlayoffs.Add(standingsRow);
+				}
 				else if (useAltClass)
 					rowClass = "alt";
 
