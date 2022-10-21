@@ -83,7 +83,7 @@ namespace ScoresStandingsHtmlConverter.Services
 					Losses = Convert.ToInt32(dataRow[3]),
 					Draws = Convert.ToInt32(dataRow[4]),
 					GamePoints = Convert.ToInt32(dataRow[5]),
-					RefPoints = Convert.ToInt32(dataRow[6]),
+					RefPoints = Convert.ToSingle(dataRow[6]),
 					TotalPoints = Convert.ToSingle(dataRow[7]),
 					Rank = Convert.ToInt32(dataRow[8]),
 				});

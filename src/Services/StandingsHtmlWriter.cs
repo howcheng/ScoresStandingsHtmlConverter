@@ -107,8 +107,8 @@ namespace ScoresStandingsHtmlConverter.Services
 				RenderTdTag(_htmlWriter, standingsRow.Losses.ToString());
 				RenderTdTag(_htmlWriter, standingsRow.Draws.ToString());
 				RenderTdTag(_htmlWriter, standingsRow.GamePoints.ToString());
-				RenderTdTag(_htmlWriter, standingsRow.RefPoints.ToString());
-				RenderTdTag(_htmlWriter, standingsRow.TotalPoints.ToString());
+				RenderTdTag(_htmlWriter, standingsRow.RefPoints.ToString("0.0"));
+				RenderTdTag(_htmlWriter, standingsRow.TotalPoints.ToString("0.0"));
 
 				_htmlWriter.RenderEndTag();
 				index += 1;

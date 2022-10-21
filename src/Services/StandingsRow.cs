@@ -8,7 +8,7 @@
 		public int Losses { get; set; }
 		public int Draws { get; set; }
 		public int GamePoints { get; set; }
-		public int RefPoints { get; set; }
+		public float RefPoints { get; set; }
 		public float TotalPoints { get; set; }
 		public int Rank { get; set; }
 	}
