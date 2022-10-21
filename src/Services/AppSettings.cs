@@ -2,7 +2,6 @@
 {
 	public class AppSettings
 	{ 
-		private static string[] s_DefaultDivisions = new string[] { Constants.DIV_10UB, Constants.DIV_10UG, Constants.DIV_12UB, Constants.DIV_12UG, Constants.DIV_14UB, Constants.DIV_14UG };
 		private static DateTime s_DefaultDate;
 
 		static AppSettings()
@@ -16,7 +15,7 @@
 		private IEnumerable<string>? _divisions;
 		public IEnumerable<string>? Divisions 
 		{
-			get => _divisions ?? s_DefaultDivisions;
+			get => _divisions ?? Constants.ALL_DIVISIONS;
 			set
 			{
 				if (value != null && value.Any())

@@ -94,13 +94,19 @@ namespace ScoresStandingsHtmlConverter.Console
 		{
 			if (args.NoScores && args.NoStandings)
 			{
-				System.Console.WriteLine("You started me but told me not to do scores or standings. What was the point? Press any key to exit.");
-				System.Console.ReadKey();
+				System.Console.WriteLine("You started me but told me not to do scores or standings. What was the point?");
 				return;
 			}
 
 			AppSettings settings = new AppSettings();
 			settings.InjectFrom(args);
+
+			if (settings.Divisions!.Any(d => !Constants.ALL_DIVISIONS.Contains(d)))
+			{
+				System.Console.WriteLine("One or more requested divisions not recognized; valid values are: {0}.", Constants.ALL_DIVISIONS.Aggregate((s1, s2) => $"{s1}, {s2}"));
+				return;
+			}
+
 			// do OAuth first -- this has to be in a separate service collection because we need to get the GoogleCredential
 			Configuration!.GetSection(nameof(AppSettings)).Bind(settings);
 
