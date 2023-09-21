@@ -112,8 +112,17 @@ namespace ScoresStandingsHtmlConverter.Services
 				RenderTdTag(_htmlWriter, standingsRow.Losses.ToString());
 				RenderTdTag(_htmlWriter, standingsRow.Draws.ToString());
 				RenderTdTag(_htmlWriter, standingsRow.GamePoints.ToString());
-				RenderTdTag(_htmlWriter, standingsRow.RefPoints.ToString("0.0"));
-				RenderTdTag(_htmlWriter, standingsRow.TotalPoints.ToString("0.0"));
+				bool fractional = standingsRow.RefPoints != (int)standingsRow.RefPoints;
+				if (fractional)
+				{
+					RenderTdTag(_htmlWriter, standingsRow.RefPoints.ToString("0.0"));
+					RenderTdTag(_htmlWriter, standingsRow.TotalPoints.ToString("0.0"));
+				}
+				else
+				{
+					RenderTdTag(_htmlWriter, ((int)standingsRow.RefPoints).ToString());
+					RenderTdTag(_htmlWriter, ((int)standingsRow.TotalPoints).ToString());
+				}
 
 				_htmlWriter.RenderEndTag();
 				index += 1;
