@@ -16,9 +16,11 @@ namespace ScoresStandingsHtmlConverter.Services
 		public async Task WriteFile(string filename, string output)
 		{
 			string folderPath = $"{_appSettings.FileOutputPath}\\{_appSettings.DateOfRound:yyyy-MM-dd}";
-			if (!Directory.Exists(folderPath))
+			if (Directory.Exists(folderPath))
+				_logger.LogInformation("Using existing folder at {folderPath}", folderPath);
+			else
 			{
-				_logger.LogInformation($"Creating folder at {folderPath}...");
+				_logger.LogInformation("Creating folder at {folderPath}...", folderPath);
 				Directory.CreateDirectory(folderPath);
 			}
 			string filePath = $"{folderPath}\\{filename}";

@@ -51,7 +51,7 @@ namespace ScoresStandingsHtmlConverter.Services
 					continue; // blank row or a placeholder for a game that did not take place this week (e.g., bye week instead of a friendly)
 
 				if (scores.Count == 0)
-					_logger.LogInformation($"Getting scores for {division} in round {roundNum}...");
+					_logger.LogInformation("Getting scores for {division} in round {roundNum}...", division, roundNum);
 
 				bool gameCancelled = (row.Values[1].EffectiveValue == null && row.Values[2].EffectiveValue == null);
 				bool friendly = firstCell.EffectiveFormat.TextFormat.ForegroundColorStyle.RgbColor.GoogleColorEquals(System.Drawing.Color.Red);
@@ -67,15 +67,15 @@ namespace ScoresStandingsHtmlConverter.Services
 					Cancelled = gameCancelled,
 					Friendly = friendly,
 				};
-				string logMsg = $"Game {scores.Count + 1}: {score.HomeTeam} vs. {score.AwayTeam}";
+				string result = string.Empty;
 				if (friendly)
-					logMsg = $"{logMsg} (friendly)";
+					result = " (friendly)";
 				if (gameCancelled)
-					logMsg = $"{logMsg}, cancelled";
+					result = $"{result}, cancelled";
 				else
-					logMsg = $"{logMsg}: {score.HomeScore}–{score.AwayScore}";
+					result = $"{result}: {score.HomeScore}–{score.AwayScore}";
 
-				_logger.LogDebug(logMsg);
+				_logger.LogDebug("Game {gameNum}: {home} vs. {away}{result}", scores.Count + 1, score.HomeTeam, score.AwayTeam, result);
 				scores.Add(score);
 			}
 

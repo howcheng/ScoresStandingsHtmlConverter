@@ -35,7 +35,7 @@ namespace ScoresStandingsHtmlConverter.Services
 
 		public async Task WriteStandingsToFile(string division, IEnumerable<StandingsRow> standingsRows)
 		{
-			_logger.LogInformation($"Beginning standings file for {division}...");
+			_logger.LogInformation("Beginning standings file for {division}...", division);
 
 			_htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "standings");
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);

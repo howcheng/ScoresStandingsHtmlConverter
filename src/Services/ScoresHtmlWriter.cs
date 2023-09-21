@@ -21,7 +21,7 @@ namespace ScoresStandingsHtmlConverter.Services
 
 		public async Task WriteScoresToFile(string division, IEnumerable<GameScore> scores)
 		{
-			_logger.LogInformation($"Beginning scores file for {division}...");
+			_logger.LogInformation("Beginning scores file for {division}...", division);
 
 			_htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "scores");
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);

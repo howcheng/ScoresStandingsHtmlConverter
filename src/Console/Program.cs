@@ -129,7 +129,7 @@ namespace ScoresStandingsHtmlConverter.Console
 			IServiceProvider sharedProvider = BuildSharedServices(settings);
 
 			ILogger<Program> log = sharedProvider.GetRequiredService<ILogger<Program>>();
-			log.LogInformation("Creating {0}{1}{2} for {3:M/d} for the following divisions: {4}"
+			log.LogInformation("Creating {scores}{and}{standings} for {date:M/d} for the following divisions: {divisions}"
 				, !settings.NoScores ? "scores" : string.Empty
 				, !settings.NoScores && !settings.NoStandings ? " and " : string.Empty
 				, !settings.NoScores ? "standings" : string.Empty

@@ -47,7 +47,7 @@ namespace ScoresStandingsHtmlConverter.Services
 				}
 			}
 
-			_logger.LogInformation($"Getting standings for {division} in round {roundNum}...");
+			_logger.LogInformation("Getting standings for {division} in round {roundNum}...", division, roundNum);
 
 			// figure out how many teams are in the division by counting the number of rows in round 1
 			int numTeams = 0;
@@ -69,7 +69,7 @@ namespace ScoresStandingsHtmlConverter.Services
 
 			// now we make the request for the standings data
 			range = $"'{division}'!F{startRow}:N{endRow}";
-			_logger.LogDebug($"Making request for data in range {range} ({numTeams} teams)");
+			_logger.LogDebug("Making request for data in range {range} ({numTeams} teams)", range, numTeams);
 			IList<IList<object>> standingsData = await _sheetsClient.GetValues(range);
 
 			List<StandingsRow> standings = new List<StandingsRow>();
