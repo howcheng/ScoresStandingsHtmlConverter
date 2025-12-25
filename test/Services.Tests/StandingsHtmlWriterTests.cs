@@ -51,7 +51,6 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 
 			using (StandingsHtmlWriter writer = new StandingsHtmlWriter(settings, mockFileWriter.Object, _logger))
 			{
-				// picking 10UG because there are 2 playoff spots
 				await writer.WriteStandingsToFile(Constants.DIV_10UG, standings);
 
 				Assert.StartsWith(Constants.DIV_10UG, filename);
@@ -74,25 +73,46 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				Assert.Equal(standings.Count(), rows.Count());
 
 				int playoffTeamCount = 0;
+				int? qualifyingRank = null;
 				for (int i = 0; i < rows.Count(); i++)
 				{
 					HtmlNode row = rows.ElementAt(i);
 					string teamName = TestHelper.GetHtmlCellContent(row.ChildNodes.Where(x => x.Name == "td").Skip(1).First());
 					StandingsRow match = standings.Single(x => x.TeamName == teamName);
-					AssertStandingsRow(match, row, i, hasTie, hasPlayoff, ref playoffTeamCount);
+					AssertStandingsRow(match, row, i, hasTie, hasPlayoff, ref playoffTeamCount, ref qualifyingRank);
 				}
 
 				// check that the playoff rows are marked properly
-				if (hasPlayoff)
+				if (hasPlayoff && leaderHasEnoughRefPts)
 				{
-					IEnumerable<HtmlNode> leaderRows = leaderHasEnoughRefPts ? rows.Take(NUM_PLAYOFF_TEAMS) : rows.Skip(NUM_PLAYOFF_TEAMS).Take(NUM_PLAYOFF_TEAMS);
+					// If there's a tie for first place, both teams should have playoffs class
+					int expectedPlayoffTeams = hasTie ? 2 : 1;
+					IEnumerable<HtmlNode> leaderRows = rows.Take(expectedPlayoffTeams);
 					Assert.All(leaderRows, tr =>
 					{
 						HtmlAttribute? classAtt = tr.Attributes["class"];
 						Assert.NotNull(classAtt);
 						Assert.Contains("playoffs", classAtt!.Value);
 					});
-					Assert.All(rows.Except(leaderRows), tr =>
+					Assert.All(rows.Skip(expectedPlayoffTeams), tr =>
+					{
+						HtmlAttribute? classAtt = tr.Attributes["class"];
+						if (classAtt != null)
+							Assert.DoesNotContain("playoffs", classAtt.Value);
+					});
+				}
+				else if (hasPlayoff && !leaderHasEnoughRefPts)
+				{
+					// Teams at positions 2-3 (indices 2-3) should have playoffs class if they have enough ref points
+					int expectedPlayoffTeams = hasTie ? 2 : 1;
+					IEnumerable<HtmlNode> qualifiedRows = rows.Skip(2).Take(expectedPlayoffTeams);
+					Assert.All(qualifiedRows, tr =>
+					{
+						HtmlAttribute? classAtt = tr.Attributes["class"];
+						Assert.NotNull(classAtt);
+						Assert.Contains("playoffs", classAtt!.Value);
+					});
+					Assert.All(rows.Except(qualifiedRows), tr =>
 					{
 						HtmlAttribute? classAtt = tr.Attributes["class"];
 						if (classAtt != null)
@@ -102,16 +122,26 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			}
 		}
 
-		private void AssertStandingsRow(StandingsRow data, HtmlNode tr, int idx, bool hasTie, bool hasPlayoff, ref int playoffTeamCount)
+		private void AssertStandingsRow(StandingsRow data, HtmlNode tr, int idx, bool hasTie, bool hasPlayoff, ref int playoffTeamCount, ref int? qualifyingRank)
 		{
 			// check the CSS class
 			bool alt = (idx % 2) == 1;
 			HtmlAttribute? classAtt = tr.Attributes["class"];
 			bool shouldUsePlayoffClass = false;
-			if (hasPlayoff)
+			if (hasPlayoff && data.RefPoints >= StandingsHtmlWriter.MIN_REF_PTS_FOR_PLAYOFFS)
 			{
-				if (playoffTeamCount < NUM_PLAYOFF_TEAMS && data.RefPoints >= 5)
+				// A team qualifies for playoffs if:
+				// 1. No one has qualified yet (playoffTeamCount == 0), OR
+				// 2. There's a tie with a team that already qualified (same rank as qualifyingRank)
+				if (playoffTeamCount == 0)
 				{
+					playoffTeamCount += 1;
+					qualifyingRank = data.Rank;
+					shouldUsePlayoffClass = true;
+				}
+				else if (qualifyingRank.HasValue && data.Rank == qualifyingRank.Value)
+				{
+					// Team tied with the qualifying rank
 					playoffTeamCount += 1;
 					shouldUsePlayoffClass = true;
 				}

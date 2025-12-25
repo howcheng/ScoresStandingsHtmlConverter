@@ -5,12 +5,15 @@ namespace ScoresStandingsHtmlConverter.Services
 {
 	public class StandingsHtmlWriter : IStandingsHtmlWriter, IDisposable
 	{
-		private const int MIN_REF_PTS_FOR_PLAYOFFS = 5;
-		private static Dictionary<string, int> s_playoffPlaces = new Dictionary<string, int>
+		public const int MIN_REF_PTS_FOR_PLAYOFFS = 5;
+		private static readonly Dictionary<string, int> s_playoffPlaces = new Dictionary<string, int>
 		{
-			{ Constants.DIV_10UB, 2 },
-			{ Constants.DIV_10UG, 2 },
-			{ Constants.DIV_12UB, 1 }, // -1 because tournament winner gets a playoff spot
+			// as of 2025 season, all divisions have 1 guaranteed playoff place
+			// 10U will give out a second one to the end-of-season tournament winner
+			// other divisions may receive wild cards at the discretion of Area
+			{ Constants.DIV_10UB, 1 },
+			{ Constants.DIV_10UG, 1 },
+			{ Constants.DIV_12UB, 1 }, 
 			{ Constants.DIV_12UG, 1 },
 			{ Constants.DIV_14UB, 1 },
 			{ Constants.DIV_14UG, 1 },
@@ -40,7 +43,8 @@ namespace ScoresStandingsHtmlConverter.Services
 			_htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, "standings");
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Table);
 			_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Colgroup);
-			RenderColTag(_htmlWriter, 45);
+            // these column widths are in pixels, don't change them without checking the resulting layout
+            RenderColTag(_htmlWriter, 45);
 			RenderColTag(_htmlWriter, 257);
 			RenderColTag(_htmlWriter, 45);
 			RenderColTag(_htmlWriter, 45);
@@ -75,7 +79,24 @@ namespace ScoresStandingsHtmlConverter.Services
 			{
 				string? rowClass = null;
 				bool useAltClass = (index % 2) == 1;
-				if (_appSettings.CurrentRound >= 6 && qualifiedForPlayoffs.Count < howManyQualifyForPlayoffs && standingsRow.RefPoints >= MIN_REF_PTS_FOR_PLAYOFFS)
+				bool qualifiesForPlayoffs = false;
+				
+				if (_appSettings.CurrentRound >= 6 && standingsRow.RefPoints >= MIN_REF_PTS_FOR_PLAYOFFS)
+				{
+					// A team qualifies if:
+					// 1. Not enough teams have qualified yet, OR
+					// 2. This team is tied with a team that already qualified
+					if (qualifiedForPlayoffs.Count < howManyQualifyForPlayoffs)
+					{
+						qualifiesForPlayoffs = true;
+					}
+					else if (qualifiedForPlayoffs.Any(q => q.Rank == standingsRow.Rank))
+					{
+						qualifiesForPlayoffs = true;
+					}
+				}
+				
+				if (qualifiesForPlayoffs)
 				{
 					rowClass = useAltClass ? "playoffsalt" : "playoffs";
 					qualifiedForPlayoffs.Add(standingsRow);
