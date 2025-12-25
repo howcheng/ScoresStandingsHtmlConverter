@@ -53,7 +53,7 @@ namespace ScoresStandingsHtmlConverter.Services
 				if (scores.Count == 0)
 					_logger.LogInformation("Getting scores for {division} in round {roundNum}...", division, roundNum);
 
-				bool gameCancelled = (row.Values[1].EffectiveValue == null && row.Values[2].EffectiveValue == null);
+				bool scoreUnknown = (row.Values[1].EffectiveValue == null && row.Values[2].EffectiveValue == null);
 				bool friendly = firstCell.EffectiveFormat.TextFormat.ForegroundColorStyle.RgbColor.GoogleColorEquals(System.Drawing.Color.Red);
 
 				GameScore score = new GameScore
@@ -64,14 +64,14 @@ namespace ScoresStandingsHtmlConverter.Services
 					HomeScore = (int?)row.Values[1].EffectiveValue?.NumberValue,
 					AwayScore = (int?)row.Values[2].EffectiveValue?.NumberValue,
 					AwayTeam = row.Values[3].EffectiveValue.StringValue,
-					Cancelled = gameCancelled,
+					Unknown = scoreUnknown,
 					Friendly = friendly,
 				};
 				string result = string.Empty;
 				if (friendly)
 					result = " (friendly)";
-				if (gameCancelled)
-					result = $"{result}, cancelled";
+				if (scoreUnknown)
+					result = $"{result}, unknown";
 				else
 					result = $"{result}: {score.HomeScore}–{score.AwayScore}";
 

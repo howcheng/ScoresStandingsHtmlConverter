@@ -33,7 +33,7 @@ namespace ScoresStandingsHtmlConverter.Services
 				string awayTeam = Helpers.StripParenthesesFromTeamName(score.AwayTeam);
 
 				List<string> rowClasses = new List<string>();
-				if (score.Cancelled)
+				if (score.Unknown)
 					rowClasses.Add("cancelled");
 				if (score.Friendly)
 					rowClasses.Add("friendly");
@@ -41,7 +41,7 @@ namespace ScoresStandingsHtmlConverter.Services
 					_htmlWriter.AddAttribute(HtmlTextWriterAttribute.Class, rowClasses.Aggregate((s1, s2) => $"{s1} {s2}"));
 				_htmlWriter.RenderBeginTag(HtmlTextWriterTag.Tr);
 				RenderTdTag(homeTeam, "home");
-				RenderTdTag(score.Cancelled ? "cancelled" : $"{score.HomeScore}&ndash;{score.AwayScore}", "score");
+				RenderTdTag(score.Unknown ? "unknown" : $"{score.HomeScore}&ndash;{score.AwayScore}", "score");
 				RenderTdTag(awayTeam, "away");
 				_htmlWriter.RenderEndTag();
 			}

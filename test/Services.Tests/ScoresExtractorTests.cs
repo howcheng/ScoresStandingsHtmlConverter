@@ -9,10 +9,12 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 	{
 		private List<RowData> CreateScoreRowData(bool hasFriendly, bool hasCancellation)
 		{
+        private List<RowData> CreateScoreRowData(bool hasFriendly, bool hasUnknownScore)
+		{
 			// create two rounds of data
 			List<RowData> rows = new List<RowData>();
-			rows.AddRange(CreateScoreRowDataForRound(1, hasFriendly, hasCancellation));
-			rows.AddRange(CreateScoreRowDataForRound(2, hasFriendly, hasCancellation));
+			rows.AddRange(CreateScoreRowDataForRound(1, hasFriendly, hasUnknownScore));
+			rows.AddRange(CreateScoreRowDataForRound(2, hasFriendly, hasUnknownScore));
 			return rows;
 		}
 
@@ -104,10 +106,10 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 		[InlineData(2, true, false)]
 		[InlineData(1, false, false)]
 		[InlineData(2, false, false)]
-		public async void CanGetScores(int roundNum, bool hasFriendly, bool hasCancellation)
+		public async Task CanGetScores(int roundNum, bool hasFriendly, bool hasUnknownScore)
 		{
 			// create some data
-			List<RowData> rowData = CreateScoreRowData(hasFriendly, hasCancellation);
+			List<RowData> rowData = CreateScoreRowData(hasFriendly, hasUnknownScore);
 
 			// mock the sheets client
 			Mock<ISheetsClient> mockClient = new Mock<ISheetsClient>();
@@ -128,19 +130,19 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Assert.Collection(scores
 				, x => AssertScoresAreCorrect(x, rowData[2])
 				, x => AssertScoresAreCorrect(x, rowData[3])
-				, x => AssertScoresAreCorrect(x, rowData[4], hasFriendly, hasCancellation)
+				, x => AssertScoresAreCorrect(x, rowData[4], hasFriendly, hasUnknownScore)
 			);
 		}
 
-		private void AssertScoresAreCorrect(GameScore score, RowData rowData, bool isFriendly = false, bool isCancelled = false)
+		private void AssertScoresAreCorrect(GameScore score, RowData rowData, bool isFriendly = false, bool isUnknown = false)
 		{
 			string homeTeam = rowData.Values[0].EffectiveValue.StringValue;
 			string awayTeam = rowData.Values[3].EffectiveValue.StringValue;
 
 			Assert.Equal(isFriendly, score.Friendly);
-			Assert.Equal(isCancelled, score.Cancelled);
+			Assert.Equal(isUnknown, score.Unknown);
 			Assert.Equal(homeTeam, score.HomeTeam);
-			if (isCancelled)
+			if (isUnknown)
 			{
 				Assert.Null(score.HomeScore);
 				Assert.Null(score.AwayScore);

@@ -8,7 +8,10 @@
 		public string AwayTeam { get; set; } = string.Empty;
 		public int? HomeScore { get; set; }
 		public int? AwayScore { get; set; }
-		public bool Cancelled { get; set; }
+		/// <summary>
+		/// Used if score is unknown or game is cancelled
+		/// </summary>
+		public bool Unknown { get; set; }
 		public bool Friendly { get; set; }
 	}
 }

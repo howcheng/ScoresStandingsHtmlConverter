@@ -6,7 +6,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 {
 	public class ScoresHtmlWriterTests
 	{
-		private List<GameScore> CreateGameScores(bool hasFriendly, bool hasCancellation)
+		private List<GameScore> CreateGameScores(bool hasFriendly, bool scoreUnknown)
 		{
 			Fixture fixture = new Fixture();
 			Func<string> createTeamName = () => $"{fixture.Create<string>()} ({fixture.Create<string>()})"; // "Team 01 (Smith)"
@@ -17,9 +17,9 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				.With(x => x.HomeTeam, createTeamName())
 				.With(x => x.AwayTeam, createTeamName())
 				.With(x => x.Friendly, () => hasFriendly ? counter == 2 : false)
-				.With(x => x.Cancelled, () =>
+				.With(x => x.Unknown, () =>
 				{
-					bool ret = hasCancellation ? counter == 2 : false;
+					bool ret = scoreUnknown ? counter == 2 : false;
 					counter += 1;
 					return ret;
 				})
@@ -33,11 +33,11 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 		[InlineData(false, true)]
 		[InlineData(true, false)]
 		[InlineData(false, false)]
-		public async Task CanWriteScores(bool hasFriendly, bool hasCancellation)
+		public async Task CanWriteScores(bool hasFriendly, bool hasUnknownScore)
 		{
 			// create some data
 			const string DIVISION = "14U Girls";
-			List<GameScore> scores = CreateGameScores(hasFriendly, hasCancellation);
+			List<GameScore> scores = CreateGameScores(hasFriendly, hasUnknownScore);
 
 			Mock<IFileWriter> mockFileWriter = new Mock<IFileWriter>();
 			string? filename = null, html = null;
@@ -67,23 +67,23 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				Assert.Collection(rows
 					, x => AssertScoreRow(scores[0], x)
 					, x => AssertScoreRow(scores[1], x)
-					, x => AssertScoreRow(scores[2], x, hasFriendly, hasCancellation)
+					, x => AssertScoreRow(scores[2], x, hasFriendly, hasUnknownScore)
 					);
 			}
 		}
 
-		private void AssertScoreRow(GameScore score, HtmlNode tr, bool isFriendly = false, bool isCancelled = false)
+		private void AssertScoreRow(GameScore score, HtmlNode tr, bool isFriendly = false, bool isUnknown = false)
 		{
 			IEnumerable<HtmlNode> cells = tr.ChildNodes.Where(x => x.Name == "td");
 			Assert.Equal(3, cells.Count()); // 3 cells in each row: home team, score, away team
-			if (isFriendly || isCancelled)
+			if (isFriendly || isUnknown)
 			{
 				HtmlAttribute classAtt = tr.Attributes["class"];
 				Assert.NotNull(classAtt);
 				string rowClass = classAtt.Value;
 				if (isFriendly)
 					Assert.Contains("friendly", rowClass);
-				if (isCancelled)
+				if (isUnknown)
 					Assert.Contains("cancelled", rowClass);
 			}	
 
@@ -97,8 +97,8 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Assert.StartsWith(awayTeam, score.AwayTeam);
 			Assert.NotEqual(score.AwayTeam, awayTeam);
 
-			if (isCancelled)
-				Assert.Equal("cancelled", gameScore);
+			if (isUnknown)
+				Assert.Equal("unknown", gameScore);
 			else
 				Assert.Equal($"{score.HomeScore}&ndash;{score.AwayScore}", gameScore);
 		}
