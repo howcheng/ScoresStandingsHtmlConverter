@@ -1,14 +1,20 @@
 using Google.Apis.Sheets.v4.Data;
 using GoogleSheetsHelper;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 using Color = System.Drawing.Color;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
 	public class ScoresExtractorTests
 	{
-		private List<RowData> CreateScoreRowData(bool hasFriendly, bool hasCancellation)
+		private readonly ILogger<ScoresExtractor> _logger;
+
+        public ScoresExtractorTests(ITestOutputHelper helper)
 		{
+            _logger = helper.BuildLoggerFor<ScoresExtractor>();
+        }
+
         private List<RowData> CreateScoreRowData(bool hasFriendly, bool hasUnknownScore)
 		{
 			// create two rounds of data
@@ -121,7 +127,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				Divisions = new[] { Constants.DIV_14UG },
 			};
 
-			ScoresExtractor service = new ScoresExtractor(settings, mockClient.Object, Mock.Of<ILogger<ScoresExtractor>>());
+			ScoresExtractor service = new ScoresExtractor(settings, mockClient.Object, _logger);
 			IEnumerable<GameScore> scores = await service.GetScores(settings.Divisions.First());
 
 			Assert.True(scores.Any());

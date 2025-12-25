@@ -1,12 +1,18 @@
 ﻿using AutoFixture;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
 	public class StandingsHtmlWriterTests
 	{
-		private const int NUM_PLAYOFF_TEAMS = 2;
+		private readonly ILogger<StandingsHtmlWriter> _logger;
+
+		public StandingsHtmlWriterTests(ITestOutputHelper helper)
+		{
+			_logger = helper.BuildLoggerFor<StandingsHtmlWriter>();
+		}
 
 		[Theory]
 		[InlineData(1, true, false)]
@@ -43,7 +49,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				DateOfRound = TestHelper.CreateRoundDateFromNumber(roundNum),
 			};
 
-			using (StandingsHtmlWriter writer = new StandingsHtmlWriter(settings, mockFileWriter.Object, Mock.Of<ILogger<StandingsHtmlWriter>>()))
+			using (StandingsHtmlWriter writer = new StandingsHtmlWriter(settings, mockFileWriter.Object, _logger))
 			{
 				// picking 10UG because there are 2 playoff spots
 				await writer.WriteStandingsToFile(Constants.DIV_10UG, standings);

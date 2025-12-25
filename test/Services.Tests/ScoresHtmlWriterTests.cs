@@ -1,11 +1,18 @@
 ﻿using AutoFixture;
 using HtmlAgilityPack;
 using Microsoft.Extensions.Logging;
+using Xunit.Abstractions;
 
 namespace ScoresStandingsHtmlConverter.Services.Tests
 {
 	public class ScoresHtmlWriterTests
 	{
+		private readonly ILogger<ScoresHtmlWriter> _logger;
+		public ScoresHtmlWriterTests(ITestOutputHelper helper)
+		{
+			_logger = helper.BuildLoggerFor<ScoresHtmlWriter>();
+		}
+
 		private List<GameScore> CreateGameScores(bool hasFriendly, bool scoreUnknown)
 		{
 			Fixture fixture = new Fixture();
@@ -48,7 +55,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			};
 			mockFileWriter.Setup(x => x.WriteFile(It.IsAny<string>(), It.IsAny<string>())).Callback(callback);
 
-			using (ScoresHtmlWriter writer = new ScoresHtmlWriter(mockFileWriter.Object, Mock.Of<ILogger<ScoresHtmlWriter>>()))
+			using (ScoresHtmlWriter writer = new ScoresHtmlWriter(mockFileWriter.Object, _logger))
  			{
 				await writer.WriteScoresToFile(DIVISION, scores);
 
