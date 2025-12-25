@@ -18,9 +18,11 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			Fixture fixture = new Fixture();
 			Func<string> createTeamName = () => $"{fixture.Create<string>()} ({fixture.Create<string>()})"; // "Team 01 (Smith)"
 			int counter = 0;
+			// round 1 date is 1st Saturday of September
+			DateTime round1Date = TestHelper.CreateRoundDateFromNumber(1);
 			List<GameScore> scores = fixture.Build<GameScore>()
 				.With(x => x.RoundNumber, 1)
-				.With(x => x.DateOfRound, DateTime.Today)
+				.With(x => x.DateOfRound, round1Date)
 				.With(x => x.HomeTeam, createTeamName())
 				.With(x => x.AwayTeam, createTeamName())
 				.With(x => x.Friendly, () => hasFriendly ? counter == 2 : false)
