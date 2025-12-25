@@ -11,7 +11,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 		private readonly ILogger<ScoresExtractor> _logger;
 
         public ScoresExtractorTests(ITestOutputHelper helper)
-		{
+        {
             _logger = helper.BuildLoggerFor<ScoresExtractor>();
         }
 
@@ -32,7 +32,7 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 				// round number row
 				Values = new List<CellData>
 				{
-					CreateCellDataForText($"ROUND {roundNum}: {TestHelper.CreateRoundDateFromNumber(roundNum)}"),
+					CreateCellDataForText($"ROUND {roundNum}: {TestHelper.CreateRoundDateFromNumber(roundNum):M/d}"),
 				},
 			});
 			rows.Add(new RowData
@@ -130,13 +130,18 @@ namespace ScoresStandingsHtmlConverter.Services.Tests
 			ScoresExtractor service = new ScoresExtractor(settings, mockClient.Object, _logger);
 			IEnumerable<GameScore> scores = await service.GetScores(settings.Divisions.First());
 
-			Assert.True(scores.Any());
+			Assert.NotEmpty(scores);
 			Assert.All(scores, x => Assert.Equal(roundNum, x.RoundNumber));
 			Assert.Equal(3, scores.Count());
+			
+			// Each round has 8 rows: header, subheader, 3 games, 3 blanks
+			// Round 1 games are at indices 2, 3, 4
+			// Round 2 games are at indices 10, 11, 12 (8 rows for round 1 + 2 rows for round 2 header/subheader)
+			int gameOffset = (roundNum - 1) * 8 + 2;
 			Assert.Collection(scores
-				, x => AssertScoresAreCorrect(x, rowData[2])
-				, x => AssertScoresAreCorrect(x, rowData[3])
-				, x => AssertScoresAreCorrect(x, rowData[4], hasFriendly, hasUnknownScore)
+				, x => AssertScoresAreCorrect(x, rowData[gameOffset])
+				, x => AssertScoresAreCorrect(x, rowData[gameOffset + 1])
+				, x => AssertScoresAreCorrect(x, rowData[gameOffset + 2], hasFriendly, hasUnknownScore)
 			);
 		}
 
